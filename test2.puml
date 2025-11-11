@@ -1,0 +1,21 @@
+@startuml 告警管理模块用例图
+
+left to right direction
+
+actor "学校管理员" as Admin
+actor "系统" as System
+
+usecase "告警配置" as UC1
+usecase "告警触发与通知" as UC2
+usecase "告警历史查询" as UC3
+usecase "告警规则编辑" as UC4
+
+Admin --> UC1
+System --> UC2
+Admin --> UC3
+Admin --> UC4
+
+UC1 .> UC4 : <<include>>
+UC2 .> UC3 : <<include>>
+
+@enduml

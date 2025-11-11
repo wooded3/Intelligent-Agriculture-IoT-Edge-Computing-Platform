@@ -1,0 +1,24 @@
+@startuml 数据管理模块用例图
+
+left to right direction
+
+actor "教师" as Teacher
+actor "学生" as Student
+actor "系统" as System
+
+usecase "数据采集" as UC1
+usecase "数据查询与可视化" as UC2
+usecase "历史数据导出" as UC3
+usecase "实时数据展示" as UC4
+
+System --> UC1
+Teacher --> UC2
+Student --> UC2
+Teacher --> UC3
+Teacher --> UC4
+Student --> UC4
+
+UC2 .> UC4 : <<include>>
+UC3 .> UC2 : <<extend>>
+
+@enduml

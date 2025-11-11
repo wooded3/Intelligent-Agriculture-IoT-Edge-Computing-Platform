@@ -1,0 +1,19 @@
+@startuml 系统维护模块用例图
+
+left to right direction
+
+actor "系统维护员" as Maintainer
+
+usecase "系统部署" as UC1
+usecase "系统备份" as UC2
+usecase "故障恢复" as UC3
+usecase "性能监控" as UC4
+usecase "日志管理" as UC5
+
+Maintainer --> UC1
+Maintainer --> UC2
+Maintainer --> UC3
+Maintainer --> UC4
+Maintainer --> UC5
+
+@enduml

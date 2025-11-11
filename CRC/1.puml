@@ -1,0 +1,83 @@
+@startuml 智慧教室系统域模型
+
+class Classroom {
+  - classroomId: String
+  - name: String
+  - location: String
+  + getClassroomInfo()
+}
+
+class Device {
+  - deviceId: String
+  - name: String
+  - type: String
+  - status: String
+  + registerDevice()
+  + updateStatus()
+}
+
+class Sensor {
+  - sensorId: String
+  - type: String
+  - unit: String
+  + collectData()
+}
+
+class DataRecord {
+  - recordId: String
+  - value: double
+  - timestamp: DateTime
+  + saveData()
+}
+
+class AlertRule {
+  - ruleId: String
+  - condition: String
+  - threshold: double
+  + evaluateCondition()
+  + triggerAlert()
+}
+
+class AutomationRule {
+  - ruleId: String
+  - condition: String
+  - action: String
+  + evaluateCondition()
+  + executeAction()
+}
+
+class User {
+  - userId: String
+  - name: String
+  - role: String
+  + login()
+  + manageDevice()
+  + configureRule()
+}
+
+class AlertLog {
+  - logId: String
+  - alertTime: DateTime
+  - status: String
+  + recordAlert()
+}
+
+class ControlLog {
+  - logId: String
+  - controlTime: DateTime
+  - action: String
+  + recordControl()
+}
+
+Classroom "1" *-- "0..*" Device
+Device "1" *-- "0..*" Sensor
+Sensor "1" -- "0..*" DataRecord
+DataRecord "1" -- "0..*" AlertRule
+DataRecord "1" -- "0..*" AutomationRule
+AlertRule "1" -- "0..*" AlertLog
+AutomationRule "1" -- "0..*" ControlLog
+User "1" -- "0..*" Device
+User "1" -- "0..*" AlertRule
+User "1" -- "0..*" AutomationRule
+
+@enduml
