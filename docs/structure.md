@@ -272,31 +272,3 @@ spring:
   }
 }
 ```
-
-    └── monitor.sh
-关键配置文件说明
-后端 application.yml:
-
-yaml
-server:
-  port: 8080
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/smart_classroom
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  redis:
-    host: localhost
-    port: 6379
-前端 package.json 关键依赖:
-
-json
-{
-  "dependencies": {
-    "vue": "^3.3.0",
-    "element-plus": "^2.3.0",
-    "echarts": "^5.4.0",
-    "axios": "^1.4.0",
-    "pinia": "^2.1.0"
-  }
-}
