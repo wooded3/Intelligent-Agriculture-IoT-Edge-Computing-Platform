@@ -82,7 +82,7 @@ model/          # 模型层：数据对象
 ```text
 components/
 ├── common/     # 通用组件
-├── layout/     # 布局组件  
+├── layout/     # 布局组件
 ├── device/     # 设备相关组件
 └── [module]/   # 业务模块组件
 ```
@@ -94,7 +94,7 @@ components/
 ```java
 /**
  * 设备管理控制器
- * 
+ *
  * @author 开发者姓名
  * @version 1.0
  * @since 2024-11-18
@@ -102,10 +102,10 @@ components/
 @RestController
 @RequestMapping("/devices")
 public class DeviceController {
-    
+
     /**
      * 注册新设备
-     * 
+     *
      * @param request 设备注册请求参数
      * @return 注册结果
      */
@@ -171,7 +171,7 @@ release/     ← 发布分支
 feature/device-management
 feature/alert-system-v1
 
-# 修复分支  
+# 修复分支
 hotfix/fix-device-register-bug
 hotfix/critical-security-fix
 
@@ -192,13 +192,13 @@ release/v1.1.0
 
 **类型说明：**
 
-- `feat`: 新功能  
-- `fix`: 修复 bug  
-- `docs`: 文档更新  
-- `style`: 代码格式调整  
-- `refactor`: 重构代码  
-- `test`: 测试相关  
-- `chore`: 构建过程或辅助工具变动  
+- `feat`: 新功能
+- `fix`: 修复 bug
+- `docs`: 文档更新
+- `style`: 代码格式调整
+- `refactor`: 重构代码
+- `test`: 测试相关
+- `chore`: 构建过程或辅助工具变动
 
 **示例：**
 
@@ -216,12 +216,12 @@ Closes #123
 
 审查清单：
 
-- 代码符合编码规范  
-- 有适当的单元测试  
-- 代码逻辑清晰正确  
-- 没有安全漏洞  
-- 性能考虑充分  
-- 文档更新完整  
+- 代码符合编码规范
+- 有适当的单元测试
+- 代码逻辑清晰正确
+- 没有安全漏洞
+- 性能考虑充分
+- 文档更新完整
 
 ---
 
@@ -320,10 +320,10 @@ public void testRegisterDevice_Success() {
     // Given
     DeviceRegisterRequest request = new DeviceRegisterRequest();
     request.setName("测试设备");
-    
+
     // When
     Device result = deviceService.registerDevice(request);
-    
+
     // Then
     assertNotNull(result.getId());
     assertEquals("测试设备", result.getName());
@@ -337,12 +337,12 @@ describe('DeviceList.vue', () => {
   it('应该正确渲染设备列表', async () => {
     // 准备
     const devices = [{ id: '1', name: '测试设备' }]
-    
+
     // 执行
     const wrapper = mount(DeviceList, {
       props: { devices }
     })
-    
+
     // 验证
     expect(wrapper.text()).toContain('测试设备')
   })
@@ -452,7 +452,7 @@ public void registerDevice(@RequestBody DeviceRegisterRequest request) {
 EXPLAIN SELECT * FROM devices WHERE status = 'ONLINE';
 
 -- 大批量操作分批次处理
-UPDATE devices SET status = 'OFFLINE' 
+UPDATE devices SET status = 'OFFLINE'
 WHERE id IN (SELECT id FROM devices WHERE created_at < '2024-01-01' LIMIT 1000);
 ```
 
@@ -472,7 +472,7 @@ spring:
   redis:
     host: localhost
 
-# application-prod.yml  
+# application-prod.yml
 server:
   port: 8080
 spring:
@@ -486,7 +486,7 @@ spring:
 
 ```dockerfile
 # 后端 Dockerfile
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 COPY target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app.jar"]
