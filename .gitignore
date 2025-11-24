@@ -3,3 +3,6 @@
 
 # VSCode Code settings
 /.vscode/
+
+# Node modules
+/frontend/node_modules/
