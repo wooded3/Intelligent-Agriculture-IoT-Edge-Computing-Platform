@@ -1,23 +1,18 @@
 package com.iaiotecp.backend.device.model;
 
+import lombok.Data;
+import java.util.List;
+import com.iaiotecp.backend.device.model.Device;
+
+@Data
 public class DeviceSummary {
+    private Long total;
+    private List<Device> devices;
 
-    private String id;
-    private String name;
+    public DeviceSummary() {}
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public DeviceSummary(Long total, List<Device> devices) {
+        this.total = total;
+        this.devices = devices;
     }
 }

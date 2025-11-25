@@ -6,3 +6,10 @@ server:
 spring:
   application:
     name: iaiotecp-backend
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.smartclassroom.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
