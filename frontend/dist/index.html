@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧教室物联网管理系统</title>
+    
+    <!-- 引入Element Plus UI库 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://unpkg.com/@element-plus/icons-vue/dist/index.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 顶部导航栏样式 */
+        .header {
+            background: linear-gradient(135deg, #409EFF 0%, #337ecc 100%);
+            color: white;
+            padding: 0 24px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 4px;
+        }
+        
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-item.active {
+            background: white;
+            color: #409EFF;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .username {
+            font-weight: 500;
+        }
+        
+        /* 主体内容区域 */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        /* 仪表板卡片样式 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #606266;
+        }
+        
+        .card-icon {
+            font-size: 24px;
+            color: #409EFF;
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #303133;
+            margin-bottom: 8px;
+        }
+        
+        .card-desc {
+            font-size: 14px;
+            color: #909399;
+        }
+        
+        .card-trend {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .trend-up {
+            background: #f0f9eb;
+            color: #67c23a;
+        }
+        
+        .trend-down {
+            background: #fef0f0;
+            color: #f56c6c;
+        }
+        
+        /* 功能区域样式 */
+        .function-area {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e4e7ed;
+        }
+        
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .function-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .function-card:hover {
+            background: #ecf5ff;
+            border-color: #409EFF;
+            transform: translateY(-2px);
+        }
+        
+        .function-icon {
+            font-size: 32px;
+            color: #409EFF;
+            margin-bottom: 12px;
+        }
+        
+        .function-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 8px;
+        }
+        
+        .function-desc {
+            font-size: 13px;
+            color: #909399;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        /* 页面底部样式 */
+        .footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .footer-link {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-link:hover {
+            color: #409EFF;
+        }
+        
+        .copyright {
+            font-size: 14px;
+            color: #95a5a6;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                height: auto;
+                padding: 12px 0;
+            }
+            
+            .logo-area {
+                margin-bottom: 12px;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-bottom: 12px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .function-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #409EFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <div class="logo-icon">🏫</div>
+                    <div class="logo-text">智慧教室物联网管理系统</div>
+                </div>
+                
+                <nav class="nav-menu">
+                    <div class="nav-item active" data-page="dashboard">仪表板</div>
+                    <div class="nav-item" data-page="devices">设备管理</div>
+                    <div class="nav-item" data-page="data">数据监控</div>
+                    <div class="nav-item" data-page="alerts">告警中心</div>
+                    <div class="nav-item" data-page="automation">自动化控制</div>
+                    <div class="nav-item" data-page="system">系统管理</div>
+                </nav>
+                
+                <div class="user-info">
+                    <span class="username">管理员</span>
+                    <div class="nav-item" data-page="profile">个人中心</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主体内容区域 -->
+        <main class="main-content">
+            <!-- 仪表板页面（默认显示） -->
+            <div id="dashboard-page" class="page-content">
+                <div class="dashboard">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-title">在线设备</div>
+                            <div class="card-icon">📱</div>
+                        </div>
+                        <div class="card-value">24<span class="card-trend trend-up">+2</span></div>
+                        <div class="card-desc">总设备数: 30</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-title">活跃告警</div>
+                            <div class="card-icon">⚠️</div>
+                        </div>
+                        <div class="card-value">3</div>
+                        <div class="card-desc">今日新增: 1</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-title">教室监控</div>
+                            <div class="card-icon">🏫</div>
+                        </div>
+                        <div class="card-value">8</div>
+                        <div class="card-desc">正常: 7, 异常: 1</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <div class="card-title">今日数据量</div>
+                            <div class="card-icon">📊</div>
+                        </div>
+                        <div class="card-value">2.4K</div>
+                        <div class="card-desc">较昨日: +12%</div>
+                    </div>
+                </div>
+                
+                <div class="function-area">
+                    <h2 class="section-title">系统功能</h2>
+                    <div class="function-grid">
+                        <div class="function-card" data-page="devices">
+                            <div class="function-icon">📱</div>
+                            <div class="function-name">设备管理</div>
+                            <div class="function-desc">注册、配置和监控物联网设备</div>
+                        </div>
+                        
+                        <div class="function-card" data-page="data">
+                            <div class="function-icon">📈</div>
+                            <div class="function-name">数据监控</div>
+                            <div class="function-desc">实时查看环境数据和历史趋势</div>
+                        </div>
+                        
+                        <div class="function-card" data-page="alerts">
+                            <div class="function-icon">🚨</div>
+                            <div class="function-name">告警中心</div>
+                            <div class="function-desc">配置规则和查看告警信息</div>
+                        </div>
+                        
+                        <div class="function-card" data-page="automation">
+                            <div class="function-icon">⚙️</div>
+                            <div class="function-name">自动化控制</div>
+                            <div class="function-desc">设置自动化规则和场景</div>
+                        </div>
+                        
+                        <div class="function-card" data-page="system">
+                            <div class="function-icon">🏢</div>
+                            <div class="function-name">教室管理</div>
+                            <div class="function-desc">管理教室信息和设备分布</div>
+                        </div>
+                        
+                        <div class="function-card" data-page="profile">
+                            <div class="function-icon">👤</div>
+                            <div class="function-name">个人中心</div>
+                            <div class="function-desc">账户设置和操作记录</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 设备管理页面（默认隐藏） -->
+            <div id="devices-page" class="page-content hidden">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载设备管理模块...</p>
+                </div>
+            </div>
+            
+            <!-- 数据监控页面（默认隐藏） -->
+            <div id="data-page" class="page-content hidden">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载数据监控模块...</p>
+                </div>
+            </div>
+            
+            <!-- 告警中心页面（默认隐藏） -->
+            <div id="alerts-page" class="page-content hidden">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载告警中心模块...</p>
+                </div>
+            </div>
+            
+            <!-- 自动化控制页面（默认隐藏） -->
+            <div id="automation-page" class="page-content hidden">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载自动化控制模块...</p>
+                </div>
+            </div>
+            
+            <!-- 系统管理页面（默认隐藏） -->
+            <div id="system-page" class="page-content hidden">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载系统管理模块...</p>
+                </div>
+            </div>
+            
+            <!-- 个人中心页面（默认隐藏） -->
+            <div id="profile-page" class="page-content hidden">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载个人中心模块...</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 页面底部 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#" class="footer-link">关于我们</a>
+                    <a href="#" class="footer-link">帮助文档</a>
+                    <a href="#" class="footer-link">API文档</a>
+                    <a href="#" class="footer-link">技术支持</a>
+                </div>
+                <div class="copyright">
+                    © 2024 智慧教室物联网系统 | 基于Spring Boot + Vue 3开发
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- 引入Vue 3和Element Plus -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+    
+    <script>
+        // 页面切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有页面元素
+            const pages = {
+                dashboard: document.getElementById('dashboard-page'),
+                devices: document.getElementById('devices-page'),
+                data: document.getElementById('data-page'),
+                alerts: document.getElementById('alerts-page'),
+                automation: document.getElementById('automation-page'),
+                system: document.getElementById('system-page'),
+                profile: document.getElementById('profile-page')
+            };
+            
+            // 获取所有导航项
+            const navItems = document.querySelectorAll('.nav-item');
+            const functionCards = document.querySelectorAll('.function-card');
+            
+            // 切换页面函数
+            function switchPage(pageId) {
+                // 隐藏所有页面
+                Object.values(pages).forEach(page => {
+                    if (page) page.classList.add('hidden');
+                });
+                
+                // 显示目标页面
+                if (pages[pageId]) {
+                    pages[pageId].classList.remove('hidden');
+                }
+                
+                // 更新导航项状态
+                navItems.forEach(item => {
+                    if (item.dataset.page === pageId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                // 如果是仪表板，更新URL但不刷新页面
+                window.history.pushState({page: pageId}, '', `#${pageId}`);
+                
+                // 模拟加载数据（实际开发中这里会调用API）
+                if (pageId !== 'dashboard') {
+                    setTimeout(() => {
+                        const loadingEl = pages[pageId].querySelector('.loading');
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div style="text-align: center; padding: 40px;">
+                                    <div style="font-size: 48px; margin-bottom: 16px;">🔧</div>
+                                    <h3>${getPageTitle(pageId)}模块</h3>
+                                    <p style="color: #909399; margin: 16px 0;">功能开发中，敬请期待...</p>
+                                    <p style="font-size: 14px; color: #c0c4cc;">根据项目规划，此模块将在后续迭代中完成</p>
+                                    <button onclick="switchPage('dashboard')" style="margin-top: 20px; padding: 8px 16px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer;">返回仪表板</button>
+                                </div>
+                            `;
+                        }
+                    }, 1000);
+                }
+            }
+            
+            // 获取页面标题
+            function getPageTitle(pageId) {
+                const titles = {
+                    dashboard: '仪表板',
+                    devices: '设备管理',
+                    data: '数据监控',
+                    alerts: '告警中心',
+                    automation: '自动化控制',
+                    system: '系统管理',
+                    profile: '个人中心'
+                };
+                return titles[pageId] || '未知页面';
+            }
+            
+            // 为导航项添加点击事件
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const pageId = this.dataset.page;
+                    switchPage(pageId);
+                });
+            });
+            
+            // 为功能卡片添加点击事件
+            functionCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const pageId = this.dataset.page;
+                    switchPage(pageId);
+                });
+            });
+            
+            // 处理浏览器前进/后退
+            window.addEventListener('popstate', function(event) {
+                const pageId = event.state ? event.state.page : 'dashboard';
+                switchPage(pageId);
+            });
+            
+            // 初始化页面（根据URL hash或默认显示仪表板）
+            const initialPage = window.location.hash.substring(1) || 'dashboard';
+            switchPage(initialPage);
+            
+            // 显示当前时间
+            function updateTime() {
+                const now = new Date();
+                const timeStr = now.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                
+                // 可以在这里将时间显示到页面的某个位置
+                // console.log('当前时间:', timeStr);
+            }
+            
+            // 每秒更新时间
+            setInterval(updateTime, 1000);
+            updateTime();
+            
+            // 将切换页面函数暴露给全局，以便其他脚本调用
+            window.switchPage = switchPage;
+        });
+    </script>
+</body>
+</html>

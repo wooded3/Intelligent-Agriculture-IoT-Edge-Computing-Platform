@@ -2,9 +2,19 @@ package com.iaiotecp.backend.data.model;
 
 public class MetricRecord {
 
+    private String id;
     private String deviceId;
-    private long timestamp;
-    private Double temperature;
+    private Double value;
+    private String unit;
+    private String timestamp; // ISO 字符串
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getDeviceId() {
         return deviceId;
@@ -14,19 +24,27 @@ public class MetricRecord {
         this.deviceId = deviceId;
     }
 
-    public long getTimestamp() {
+    public Double getValue() {
+        return value;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public Double getTemperature() {
-        return temperature;
-    }
-
-    public void setTemperature(Double temperature) {
-        this.temperature = temperature;
     }
 }

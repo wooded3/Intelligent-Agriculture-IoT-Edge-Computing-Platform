@@ -1,18 +1,32 @@
 package com.iaiotecp.backend.device.model;
 
-import lombok.Data;
 import java.util.List;
-import com.iaiotecp.backend.device.model.Device;
 
-@Data
 public class DeviceSummary {
     private Long total;
-    private List<Device> devices;
+    private List<Device> rows;
 
-    public DeviceSummary() {}
+    public DeviceSummary() {
+    }
 
-    public DeviceSummary(Long total, List<Device> devices) {
+    public DeviceSummary(Long total, List<Device> rows) {
         this.total = total;
-        this.devices = devices;
+        this.rows = rows;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
+    }
+
+    public List<Device> getRows() {
+        return rows;
+    }
+
+    public void setRows(List<Device> rows) {
+        this.rows = rows;
     }
 }

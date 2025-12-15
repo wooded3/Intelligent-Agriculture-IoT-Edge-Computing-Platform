@@ -1,20 +1,20 @@
 package com.iaiotecp.backend.device.model;
 
-import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.Map;
 
-@Data
 public class Device {
     private String id;
     private String name;
-    private String type;  // SENSOR, ACTUATOR, GATEWAY
-    private String status; // ONLINE, OFFLINE, ERROR
+    private String type;      // SENSOR, ACTUATOR, GATEWAY
+    private String status;    // ONLINE, OFFLINE, ERROR
     private String classroomId;
-    private String config; // JSON格式的配置信息
+    private Map<String, Object> config; // JSON 配置
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
-    public Device() {}
+    public Device() {
+    }
 
     public Device(String id, String name, String type, String classroomId) {
         this.id = id;
@@ -24,5 +24,69 @@ public class Device {
         this.status = "OFFLINE";
         this.createTime = LocalDateTime.now();
         this.updateTime = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getClassroomId() {
+        return classroomId;
+    }
+
+    public void setClassroomId(String classroomId) {
+        this.classroomId = classroomId;
+    }
+
+    public Map<String, Object> getConfig() {
+        return config;
+    }
+
+    public void setConfig(Map<String, Object> config) {
+        this.config = config;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 }
