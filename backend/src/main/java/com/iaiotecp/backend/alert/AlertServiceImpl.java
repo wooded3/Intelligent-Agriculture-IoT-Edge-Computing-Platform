@@ -1,15 +1,24 @@
 package com.iaiotecp.backend.alert;
 
-import com.iaiotecp.backend.alert.model.ActiveAlert;
-import com.iaiotecp.backend.alert.model.AlertRule;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.stereotype.Service;
+
+import com.iaiotecp.backend.alert.model.ActiveAlert;
+import com.iaiotecp.backend.alert.model.AlertRule;
+
+/**
+ * 告警服务实现类
+ * 实现告警相关的业务逻辑
+ *
+ * @author 开发者姓名
+ * @version 1.0
+ * @since 2024-01-01
+ */
 @Service
 public class AlertServiceImpl implements AlertService {
 
@@ -55,5 +64,56 @@ public class AlertServiceImpl implements AlertService {
     @Override
     public List<ActiveAlert> listActiveAlerts() {
         return new ArrayList<>(activeAlerts);
+    }
+
+    @Override
+    public void checkAndGenerateAlert(String deviceId, String deviceName, String metricName, double value) {
+        // 检查每个规则是否满足告警条件
+        for (AlertRule rule : rules) {
+            if (rule.isEnabled() && rule.getDeviceIds() != null && rule.getDeviceIds().contains(deviceId) && 
+                rule.getName() != null && rule.getName().contains(metricName) && 
+                isConditionMet(value, rule.getCondition(), rule.getThreshold())) {
+                
+                // 生成新的告警
+                ActiveAlert alert = new ActiveAlert(
+                    "alert_" + alertCounter.getAndIncrement(),
+                    rule.getName(),
+                    deviceName,
+                    value,
+                    rule.getThreshold(),
+                    Instant.now().toString()
+                );
+                activeAlerts.add(alert);
+                
+                // 可以在这里添加通知逻辑，如发送消息给管理员
+            }
+        }
+    }
+
+    @Override
+    public void resolveAlert(String alertId) {
+        // 从活跃告警列表中移除已解决的告警
+        activeAlerts.removeIf(alert -> alertId.equals(alert.getId()));
+    }
+
+    /**
+     * 检查数值是否满足告警条件
+     *
+     * @param value 实际值
+     * @param condition 条件
+     * @param threshold 阈值
+     * @return 是否满足条件
+     */
+    private boolean isConditionMet(double value, String condition, double threshold) {
+        switch (condition) {
+            case "GREATER_THAN":
+                return value > threshold;
+            case "LESS_THAN":
+                return value < threshold;
+            case "EQUAL":
+                return value == threshold;
+            default:
+                return false;
+        }
     }
 }
