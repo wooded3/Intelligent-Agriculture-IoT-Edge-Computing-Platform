@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,5 +68,21 @@ public class AlertController {
     @GetMapping("/current")
     public ResponseEntity<Result<List<ActiveAlert>>> current() {
         return ResponseEntity.ok(Result.success(alertService.listActiveAlerts()));
+    }
+
+    /**
+     * 处理告警（标记为已解决）
+     *
+     * @param alertId 告警ID
+     * @return 包含操作结果的响应
+     */
+    @PatchMapping("/{alertId}/resolve")
+    public ResponseEntity<Result<Void>> resolveAlert(@PathVariable String alertId) {
+        try {
+            alertService.resolveAlert(alertId);
+            return ResponseEntity.ok(Result.success(null));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Result.error("处理告警失败: " + e.getMessage()));
+        }
     }
 }

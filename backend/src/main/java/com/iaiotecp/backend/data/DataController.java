@@ -21,8 +21,12 @@ public class DataController {
 
 	@PostMapping("/sensor-data")
 	public ResponseEntity<Result<Void>> receiveMetric(@RequestBody MetricRecord record) {
-		dataService.saveMetric(record);
-		return ResponseEntity.accepted().body(Result.success("数据接收成功", null));
+		try {
+			dataService.saveMetric(record.getDeviceId(), record.getValue(), record.getUnit(), record.getTimestamp());
+			return ResponseEntity.ok(Result.success(null));
+		} catch (Exception e) {
+			return ResponseEntity.ok(Result.error("数据接收失败: " + e.getMessage()));
+		}
 	}
 
 	@GetMapping("/sensor-data")

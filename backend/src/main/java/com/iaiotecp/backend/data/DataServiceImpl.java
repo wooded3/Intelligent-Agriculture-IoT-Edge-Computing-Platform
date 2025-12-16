@@ -1,37 +1,51 @@
 package com.iaiotecp.backend.data;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.iaiotecp.backend.data.mapper.MetricMapper;
 import com.iaiotecp.backend.data.model.MetricPage;
 import com.iaiotecp.backend.data.model.MetricRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Service
 public class DataServiceImpl implements DataService {
 
-    private static final Logger log = LoggerFactory.getLogger(DataServiceImpl.class);
-
-    private final List<MetricRecord> records = new CopyOnWriteArrayList<>();
-    private final AtomicLong counter = new AtomicLong(1);
+    @Autowired
+    private MetricMapper metricMapper;
 
     @Override
-    public void saveMetric(MetricRecord record) {
-        record.setId("data_" + counter.getAndIncrement());
-        if (record.getTimestamp() == null) {
+    @Transactional
+    public void saveMetric(String deviceId, Double value, String unit, String timestamp) {
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            throw new IllegalArgumentException("设备ID不能为空");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("数值不能为空");
+        }
+
+        String id = "metric_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        MetricRecord record = new MetricRecord();
+        record.setId(id);
+        record.setDeviceId(deviceId);
+        record.setValue(value);
+        record.setUnit(unit);
+        
+        if (timestamp != null && !timestamp.trim().isEmpty()) {
+            record.setTimestamp(timestamp);
+        } else {
             record.setTimestamp(Instant.now().toString());
         }
-        records.add(record);
-        log.info("Received metric: deviceId={}, ts={}, value={}, unit={}",
-                record.getDeviceId(), record.getTimestamp(), record.getValue(), record.getUnit());
+
+        metricMapper.insert(record);
     }
 
     @Override
@@ -39,38 +53,21 @@ public class DataServiceImpl implements DataService {
         int currentPage = (page == null || page < 1) ? 1 : page;
         int currentPageSize = (pageSize == null || pageSize < 1) ? 10 : pageSize;
 
-        Instant start = parseInstant(startTime);
-        Instant end = parseInstant(endTime);
+        PageHelper.startPage(currentPage, currentPageSize);
+        List<MetricRecord> records = metricMapper.selectList(deviceId, startTime, endTime);
+        PageInfo<MetricRecord> pageInfo = new PageInfo<>(records);
 
-        List<MetricRecord> filtered = records.stream()
-                .filter(r -> deviceId == null || deviceId.equals(r.getDeviceId()))
-                .filter(r -> {
-                    Instant ts = parseInstant(r.getTimestamp());
-                    boolean afterStart = start == null || (ts != null && !ts.isBefore(start));
-                    boolean beforeEnd = end == null || (ts != null && !ts.isAfter(end));
-                    return afterStart && beforeEnd;
-                })
-                .sorted(Comparator.comparing(MetricRecord::getTimestamp).reversed())
-                .collect(Collectors.toList());
-
-        int total = filtered.size();
-        int fromIndex = (currentPage - 1) * currentPageSize;
-        if (fromIndex >= total) {
-            return new MetricPage(total, new ArrayList<>());
-        }
-        int toIndex = Math.min(fromIndex + currentPageSize, total);
-        return new MetricPage(total, filtered.subList(fromIndex, toIndex));
+        return new MetricPage(pageInfo.getTotal(), records);
     }
 
-    private Instant parseInstant(String ts) {
-        if (ts == null || ts.isBlank()) {
-            return null;
+    private Instant parseInstant(String timestamp) {
+        if (timestamp == null || timestamp.trim().isEmpty()) {
+            return Instant.now();
         }
         try {
-            return Instant.parse(ts);
-        } catch (DateTimeParseException e) {
-            log.warn("无法解析时间戳: {}", ts);
-            return null;
+            return Instant.parse(timestamp);
+        } catch (Exception e) {
+            return Instant.now();
         }
     }
 }

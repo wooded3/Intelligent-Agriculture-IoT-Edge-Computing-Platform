@@ -1,27 +1,31 @@
 package com.iaiotecp.backend.device;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.iaiotecp.backend.device.mapper.DeviceMapper;
 import com.iaiotecp.backend.device.model.Device;
 import com.iaiotecp.backend.device.model.DeviceSummary;
 
 @Service
 public class DeviceServiceImpl implements DeviceService {
 
-    // 使用内存 Map 模拟数据库
-    private final Map<String, Device> deviceStore = new ConcurrentHashMap<>();
-    private final AtomicLong deviceCounter = new AtomicLong(1);
+    @Autowired
+    private DeviceMapper deviceMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
+    @Transactional
     public Device registerDevice(String name, String type, String classroomId, Map<String, Object> config) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("设备名称不能为空");
@@ -36,11 +40,23 @@ public class DeviceServiceImpl implements DeviceService {
             throw new IllegalArgumentException("无效的设备类型: " + type);
         }
 
-        String deviceId = "device_" + deviceCounter.getAndIncrement();
+        String deviceId = "device_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         Device device = new Device(deviceId, name, type.toUpperCase(), classroomId);
-        device.setConfig(config);
+        device.setConfigMap(config);
+        if (config != null) {
+            try {
+                device.setConfig(objectMapper.writeValueAsString(config));
+            } catch (Exception e) {
+                device.setConfig("{}");
+            }
+        } else {
+            device.setConfig("{}");
+        }
+        device.setStatus("OFFLINE");
+        device.setCreateTime(LocalDateTime.now());
+        device.setUpdateTime(LocalDateTime.now());
 
-        deviceStore.put(deviceId, device);
+        deviceMapper.insert(device);
         return device;
     }
 
@@ -49,9 +65,17 @@ public class DeviceServiceImpl implements DeviceService {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("设备ID不能为空");
         }
-        Device device = deviceStore.get(id);
+        Device device = deviceMapper.selectById(id);
         if (device == null) {
             throw new RuntimeException("设备不存在: " + id);
+        }
+        // 解析config JSON字符串为Map
+        if (device.getConfig() != null && !device.getConfig().isEmpty()) {
+            try {
+                device.setConfigMap(objectMapper.readValue(device.getConfig(), Map.class));
+            } catch (Exception e) {
+                device.setConfigMap(null);
+            }
         }
         return device;
     }
@@ -61,29 +85,30 @@ public class DeviceServiceImpl implements DeviceService {
         int currentPage = (page == null || page < 1) ? 1 : page;
         int currentPageSize = (pageSize == null || pageSize < 1) ? 10 : pageSize;
 
-        List<Device> filteredDevices = deviceStore.values().stream()
-                .filter(device -> classroomId == null || classroomId.equals(device.getClassroomId()))
-                .filter(device -> type == null || type.equalsIgnoreCase(device.getType()))
-                .sorted(Comparator.comparing(Device::getCreateTime).reversed())
-                .collect(Collectors.toList());
+        PageHelper.startPage(currentPage, currentPageSize);
+        List<Device> devices = deviceMapper.selectList(classroomId, type);
+        // 解析每个设备的config
+        devices.forEach(d -> {
+            if (d.getConfig() != null && !d.getConfig().isEmpty()) {
+                try {
+                    d.setConfigMap(objectMapper.readValue(d.getConfig(), Map.class));
+                } catch (Exception e) {
+                    d.setConfigMap(null);
+                }
+            }
+        });
+        PageInfo<Device> pageInfo = new PageInfo<>(devices);
 
-        int total = filteredDevices.size();
-        int fromIndex = (currentPage - 1) * currentPageSize;
-        if (fromIndex >= total) {
-            return new DeviceSummary((long) total, new ArrayList<>());
-        }
-        int toIndex = Math.min(fromIndex + currentPageSize, total);
-        List<Device> pageDevices = filteredDevices.subList(fromIndex, toIndex);
-
-        return new DeviceSummary((long) total, pageDevices);
+        return new DeviceSummary(pageInfo.getTotal(), devices);
     }
 
     @Override
+    @Transactional
     public Device updateDevice(String id, String name, String type, String classroomId, Map<String, Object> config) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("设备ID不能为空");
         }
-        Device existingDevice = deviceStore.get(id);
+        Device existingDevice = deviceMapper.selectById(id);
         if (existingDevice == null) {
             throw new RuntimeException("设备不存在: " + id);
         }
@@ -101,26 +126,35 @@ public class DeviceServiceImpl implements DeviceService {
             existingDevice.setClassroomId(classroomId);
         }
         if (config != null) {
-            existingDevice.setConfig(config);
+            existingDevice.setConfigMap(config);
+            try {
+                existingDevice.setConfig(objectMapper.writeValueAsString(config));
+            } catch (Exception e) {
+                existingDevice.setConfig("{}");
+            }
         }
         existingDevice.setUpdateTime(LocalDateTime.now());
+
+        deviceMapper.update(existingDevice);
         return existingDevice;
     }
 
     @Override
+    @Transactional
     public boolean deleteDevice(String id) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("设备ID不能为空");
         }
-        Device removedDevice = deviceStore.remove(id);
-        if (removedDevice != null) {
-            return true;
-        } else {
+        Device device = deviceMapper.selectById(id);
+        if (device == null) {
             throw new RuntimeException("设备不存在: " + id);
         }
+        deviceMapper.deleteById(id);
+        return true;
     }
 
     @Override
+    @Transactional
     public boolean updateDeviceStatus(String id, String status) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("设备ID不能为空");
@@ -131,18 +165,39 @@ public class DeviceServiceImpl implements DeviceService {
         if (!isValidDeviceStatus(status)) {
             throw new IllegalArgumentException("无效的设备状态: " + status);
         }
-        Device device = deviceStore.get(id);
+        Device device = deviceMapper.selectById(id);
         if (device == null) {
             throw new RuntimeException("设备不存在: " + id);
         }
-        device.setStatus(status.toUpperCase());
-        device.setUpdateTime(LocalDateTime.now());
+        deviceMapper.updateStatus(id, status.toUpperCase());
         return true;
     }
 
     @Override
     public List<Device> getAllDevices() {
-        return new ArrayList<>(deviceStore.values());
+        List<Device> devices = deviceMapper.selectList(null, null);
+        devices.forEach(d -> {
+            if (d.getConfig() != null && !d.getConfig().isEmpty()) {
+                try {
+                    d.setConfigMap(objectMapper.readValue(d.getConfig(), Map.class));
+                } catch (Exception e) {
+                    d.setConfigMap(null);
+                }
+            }
+        });
+        return devices;
+    }
+
+    public int getDeviceCount() {
+        return deviceMapper.countAll();
+    }
+
+    public int getDeviceCountByStatus(String status) {
+        return deviceMapper.countByStatus(status);
+    }
+
+    public int getDeviceCountByClassroomId(String classroomId) {
+        return deviceMapper.countByClassroomId(classroomId);
     }
 
     private boolean isValidDeviceType(String type) {

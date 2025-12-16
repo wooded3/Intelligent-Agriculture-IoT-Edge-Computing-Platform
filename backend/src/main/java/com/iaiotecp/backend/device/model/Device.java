@@ -9,7 +9,8 @@ public class Device {
     private String type;      // SENSOR, ACTUATOR, GATEWAY
     private String status;    // ONLINE, OFFLINE, ERROR
     private String classroomId;
-    private Map<String, Object> config; // JSON 配置
+    private String config; // JSON 配置字符串（数据库存储）
+    private Map<String, Object> configMap; // JSON 配置对象（应用层使用）
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -66,12 +67,20 @@ public class Device {
         this.classroomId = classroomId;
     }
 
-    public Map<String, Object> getConfig() {
+    public String getConfig() {
         return config;
     }
 
-    public void setConfig(Map<String, Object> config) {
+    public void setConfig(String config) {
         this.config = config;
+    }
+
+    public Map<String, Object> getConfigMap() {
+        return configMap;
+    }
+
+    public void setConfigMap(Map<String, Object> configMap) {
+        this.configMap = configMap;
     }
 
     public LocalDateTime getCreateTime() {
