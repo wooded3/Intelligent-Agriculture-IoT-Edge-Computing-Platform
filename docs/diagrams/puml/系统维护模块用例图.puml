@@ -3,17 +3,30 @@
 left to right direction
 
 actor "系统维护员" as Maintainer
+actor "学校管理员" as Admin
 
-usecase "系统部署" as UC1
-usecase "系统备份" as UC2
-usecase "故障恢复" as UC3
-usecase "性能监控" as UC4
-usecase "日志管理" as UC5
+usecase "查询系统状态" as UC1
+usecase "教室管理" as UC2
+usecase "查询教室列表" as UC3
+usecase "创建教室" as UC4
+usecase "编辑教室" as UC5
+usecase "删除教室" as UC6
 
 Maintainer --> UC1
-Maintainer --> UC2
-Maintainer --> UC3
-Maintainer --> UC4
-Maintainer --> UC5
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+
+UC2 .> UC3 : <<include>>
+UC2 .> UC4 : <<include>>
+UC2 .> UC5 : <<include>>
+UC2 .> UC6 : <<include>>
+
+note right of UC1
+  检查系统健康状态
+  数据库连接状态等
+end note
 
 @enduml

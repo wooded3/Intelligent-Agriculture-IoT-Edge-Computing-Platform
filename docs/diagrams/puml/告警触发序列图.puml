@@ -1,0 +1,68 @@
+@startuml 告警触发序列图
+
+participant "DataService" as DataService
+participant "AlertService" as AlertService
+participant "AlertMapper" as Mapper
+database "MySQL数据库" as DB
+
+== 数据保存后触发告警检测 ==
+
+DataService -> AlertService : checkAndGenerateAlert(deviceId, deviceName, metricName, value)
+activate AlertService
+
+AlertService -> DB : SELECT * FROM alert_rules\nWHERE enabled = 1
+activate DB
+DB --> AlertService : 返回启用的规则列表
+deactivate DB
+
+loop 遍历每个告警规则
+  AlertService -> AlertService : 检查设备ID是否在规则范围内
+  
+  alt 设备ID匹配
+    AlertService -> AlertService : 根据条件类型判断
+    
+    alt 条件类型 = GREATER_THAN
+      AlertService -> AlertService : 判断 value > threshold
+    else 条件类型 = LESS_THAN
+      AlertService -> AlertService : 判断 value < threshold
+    else 条件类型 = EQUAL
+      AlertService -> AlertService : 判断 value == threshold
+    end
+    
+    alt 满足告警条件
+      AlertService -> AlertService : 创建ActiveAlert对象
+      AlertService -> Mapper : insert(alert)
+      activate Mapper
+      
+      Mapper -> DB : INSERT INTO active_alerts\n(id, rule_id, device_id, value, threshold, ...)
+      activate DB
+      DB --> Mapper : 返回插入结果
+      deactivate DB
+      
+      Mapper --> AlertService : 返回告警对象
+      deactivate Mapper
+      
+      note right of AlertService
+        告警已生成并保存
+        前端可通过查询接口获取
+      end note
+    else 不满足条件
+      note right of AlertService
+        继续监控，不生成告警
+      end note
+    end
+  else 设备ID不匹配
+    note right of AlertService
+      跳过该规则
+    end note
+  end
+end
+
+AlertService --> DataService : 告警检测完成
+deactivate AlertService
+
+@enduml
+
+
+
+

@@ -1,83 +1,129 @@
 @startuml 智慧教室系统域模型
 
 class Classroom {
-  - classroomId: String
+  - id: String
   - name: String
   - location: String
-  + getClassroomInfo()
+  - capacity: Integer
+  - createTime: DateTime
+  - updateTime: DateTime
+  + getId()
+  + getName()
+  + getLocation()
 }
 
 class Device {
-  - deviceId: String
+  - id: String
   - name: String
-  - type: String
-  - status: String
+  - type: String {SENSOR, ACTUATOR, GATEWAY}
+  - status: String {ONLINE, OFFLINE, ERROR}
+  - classroomId: String
+  - config: String
+  - createTime: DateTime
+  - updateTime: DateTime
   + registerDevice()
   + updateStatus()
+  + updateConfig()
 }
 
-class Sensor {
-  - sensorId: String
-  - type: String
+class MetricRecord {
+  - id: String
+  - deviceId: String
+  - value: Double
   - unit: String
-  + collectData()
-}
-
-class DataRecord {
-  - recordId: String
-  - value: double
   - timestamp: DateTime
+  - createTime: DateTime
   + saveData()
+  + queryData()
 }
 
 class AlertRule {
-  - ruleId: String
-  - condition: String
-  - threshold: double
+  - id: String
+  - name: String
+  - conditionType: String {GREATER_THAN, LESS_THAN, EQUAL}
+  - threshold: Double
+  - deviceIds: List<String>
+  - enabled: Boolean
+  - createTime: DateTime
+  - updateTime: DateTime
   + evaluateCondition()
   + triggerAlert()
 }
 
-class AutomationRule {
+class ActiveAlert {
+  - id: String
   - ruleId: String
-  - condition: String
-  - action: String
+  - ruleName: String
+  - deviceId: String
+  - deviceName: String
+  - value: Double
+  - threshold: Double
+  - status: String {ACTIVE, RESOLVED}
+  - timestamp: DateTime
+  - resolveTime: DateTime
+  + resolve()
+}
+
+class AlertHistory {
+  - id: String
+  - ruleId: String
+  - ruleName: String
+  - deviceId: String
+  - deviceName: String
+  - value: Double
+  - threshold: Double
+  - status: String
+  - triggerTime: DateTime
+  - resolveTime: DateTime
+}
+
+class AutomationRule {
+  - id: String
+  - name: String
+  - conditionDesc: String
+  - actionDesc: String
+  - enabled: Boolean
+  - createTime: DateTime
+  - updateTime: DateTime
   + evaluateCondition()
   + executeAction()
+}
+
+class ControlCommand {
+  - id: String
+  - deviceId: String
+  - deviceName: String
+  - classroomId: String
+  - commandType: String {SWITCH, ADJUST, MODE_CHANGE}
+  - commandParams: String
+  - status: String {PENDING, EXECUTED, FAILED}
+  - createdBy: String
+  - createTime: DateTime
+  - executeTime: DateTime
+  + sendCommand()
+  + updateStatus()
 }
 
 class User {
   - userId: String
   - name: String
-  - role: String
+  - role: String {TEACHER, STUDENT, ADMIN, MAINTAINER}
   + login()
   + manageDevice()
   + configureRule()
 }
 
-class AlertLog {
-  - logId: String
-  - alertTime: DateTime
-  - status: String
-  + recordAlert()
-}
-
-class ControlLog {
-  - logId: String
-  - controlTime: DateTime
-  - action: String
-  + recordControl()
-}
-
-Classroom "1" *-- "0..*" Device
-Device "1" *-- "0..*" Sensor
-Sensor "1" -- "0..*" DataRecord
-DataRecord "1" -- "0..*" AlertRule
-DataRecord "1" -- "0..*" AutomationRule
-AlertRule "1" -- "0..*" AlertLog
-AutomationRule "1" -- "0..*" ControlLog
-User "1" -- "0..*" Device
-User "1" -- "0..*" AlertRule
-User "1" -- "0..*" AutomationRule
+' 关系定义
+Classroom "1" *-- "0..*" Device : contains
+Device "1" -- "0..*" MetricRecord : generates
+MetricRecord "0..*" ..> "0..*" AlertRule : triggers
+MetricRecord "0..*" ..> "0..*" AutomationRule : triggers
+AlertRule "1" -- "0..*" ActiveAlert : generates
+ActiveAlert "1" -- "0..1" AlertHistory : resolves to
+AutomationRule "1" -- "0..*" ControlCommand : executes
+ControlCommand "1" --> "1" Device : controls
+User "1" -- "0..*" Device : manages
+User "1" -- "0..*" AlertRule : configures
+User "1" -- "0..*" AutomationRule : configures
 
 @enduml

@@ -1,0 +1,133 @@
+@startuml 系统逻辑架构包图
+
+!define RECTANGLE class
+
+package "前端层 (Frontend Layer)" {
+  package "views" {
+    [Dashboard.vue]
+    [DeviceManagement.vue]
+    [DataMonitoring.vue]
+    [AlertCenter.vue]
+    [AutomationControl.vue]
+    [SystemManagement.vue]
+  }
+  
+  package "components" {
+    [Layout.vue]
+  }
+  
+  package "api" {
+    [index.ts]
+  }
+  
+  package "router" {
+    [index.ts]
+  }
+}
+
+package "后端层 (Backend Layer)" {
+  package "com.iaiotecp.backend" {
+    package "device" {
+      [DeviceController]
+      [DeviceService]
+      [DeviceServiceImpl]
+      package "mapper" {
+        [DeviceMapper]
+      }
+      package "model" {
+        [Device]
+        [DeviceRegisterRequest]
+        [DeviceSummary]
+      }
+    }
+    
+    package "data" {
+      [DataController]
+      [DataService]
+      [DataServiceImpl]
+      package "mapper" {
+        [MetricMapper]
+      }
+      package "model" {
+        [MetricRecord]
+        [MetricPage]
+      }
+    }
+    
+    package "alert" {
+      [AlertController]
+      [AlertService]
+      [AlertServiceImpl]
+      package "model" {
+        [AlertRule]
+        [ActiveAlert]
+        [AlertHistory]
+      }
+    }
+    
+    package "control" {
+      [AutomationController]
+      [ControlController]
+      [ControlService]
+      [ControlServiceImpl]
+      package "model" {
+        [AutomationRule]
+        [ControlCommand]
+      }
+    }
+    
+    package "maintenance" {
+      [MaintenanceController]
+      [ClassroomController]
+      [MaintenanceService]
+      [MaintenanceServiceImpl]
+      package "model" {
+        [Classroom]
+      }
+    }
+  }
+}
+
+package "数据层 (Data Layer)" {
+  database "MySQL Database" {
+    [classrooms]
+    [devices]
+    [sensor_data]
+    [alert_rules]
+    [active_alerts]
+    [alert_history]
+    [automation_rules]
+    [control_commands]
+  }
+}
+
+' 依赖关系
+[DeviceManagement.vue] --> [index.ts] : 调用API
+[index.ts] --> [DeviceController] : HTTP请求
+[DeviceController] --> [DeviceService] : 调用服务
+[DeviceService] --> [DeviceMapper] : 数据访问
+[DeviceMapper] --> [devices] : SQL查询
+
+[DataMonitoring.vue] --> [index.ts] : 调用API
+[index.ts] --> [DataController] : HTTP请求
+[DataController] --> [DataService] : 调用服务
+[DataService] --> [MetricMapper] : 数据访问
+[MetricMapper] --> [sensor_data] : SQL查询
+
+[AlertCenter.vue] --> [index.ts] : 调用API
+[index.ts] --> [AlertController] : HTTP请求
+[AlertController] --> [AlertService] : 调用服务
+
+[AutomationControl.vue] --> [index.ts] : 调用API
+[index.ts] --> [AutomationController] : HTTP请求
+[AutomationController] --> [ControlService] : 调用服务
+
+[SystemManagement.vue] --> [index.ts] : 调用API
+[index.ts] --> [ClassroomController] : HTTP请求
+[ClassroomController] --> [MaintenanceService] : 调用服务
+
+@enduml
+
+
+
+

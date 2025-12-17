@@ -1,0 +1,50 @@
+@startuml 设备注册序列图
+
+actor "学校管理员" as Admin
+participant "DeviceManagement.vue" as Frontend
+participant "DeviceController" as Controller
+participant "DeviceService" as Service
+participant "DeviceMapper" as Mapper
+database "MySQL数据库" as DB
+
+Admin -> Frontend : 填写设备信息，点击注册
+Frontend -> Controller : POST /api/devices\n{name, type, classroomId, config}
+activate Controller
+
+Controller -> Service : registerDevice(name, type, classroomId, config)
+activate Service
+
+Service -> Service : 验证设备信息\n(名称、类型、教室ID)
+alt 验证失败
+  Service --> Controller : 抛出异常
+  Controller --> Frontend : 返回错误响应
+  Frontend --> Admin : 显示错误提示
+else 验证成功
+  Service -> Service : 生成设备ID\n(device_xxxxxxxx)
+  Service -> Service : 设置默认状态为OFFLINE
+  Service -> Mapper : insert(device)
+  activate Mapper
+  
+  Mapper -> DB : INSERT INTO devices\nVALUES (...)
+  activate DB
+  DB --> Mapper : 返回插入结果
+  deactivate DB
+  
+  Mapper --> Service : 返回Device对象
+  deactivate Mapper
+  
+  Service --> Controller : 返回Device对象
+  deactivate Service
+  
+  Controller --> Frontend : 返回成功响应\n{code: 1, data: Device}
+  deactivate Controller
+  
+  Frontend --> Admin : 显示注册成功提示
+  Frontend -> Frontend : 刷新设备列表
+end
+
+@enduml
+
+
+
+

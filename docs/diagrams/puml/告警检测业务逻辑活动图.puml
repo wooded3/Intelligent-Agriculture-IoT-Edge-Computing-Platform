@@ -1,0 +1,74 @@
+@startuml 告警检测业务逻辑活动图
+
+start
+
+:接收数据采集完成事件;
+
+:获取设备ID、设备名称、指标名称、指标值;
+
+:查询所有启用的告警规则\n(SELECT * FROM alert_rules WHERE enabled = 1);
+
+:遍历每个告警规则;
+
+if (设备ID是否在规则范围内?) then (否)
+  :跳过该规则;
+  :继续下一个规则;
+else (是)
+  :获取规则的条件类型和阈值;
+  
+  if (条件类型 = GREATER_THAN?) then (是)
+    if (指标值 > 阈值?) then (是)
+      :满足告警条件;
+    else (否)
+      :不满足条件，继续监控;
+    endif
+  else (否)
+    if (条件类型 = LESS_THAN?) then (是)
+      if (指标值 < 阈值?) then (是)
+        :满足告警条件;
+      else (否)
+        :不满足条件，继续监控;
+      endif
+    else (否)
+      if (条件类型 = EQUAL?) then (是)
+        if (指标值 == 阈值?) then (是)
+          :满足告警条件;
+        else (否)
+          :不满足条件，继续监控;
+        endif
+      endif
+    endif
+  endif
+  
+  if (满足告警条件?) then (是)
+    :创建ActiveAlert对象;
+    :设置告警信息\n(规则ID、设备ID、触发值、阈值等);
+    :设置告警状态为ACTIVE;
+    :设置触发时间为当前时间;
+    :保存告警到数据库\n(INSERT INTO active_alerts);
+    
+    if (保存成功?) then (是)
+      :告警已生成;
+      note right
+        前端可通过查询接口
+        获取活跃告警列表
+      end note
+    else (否)
+      :记录错误日志;
+    endif
+  endif
+endif
+
+if (还有更多规则?) then (是)
+  :继续下一个规则;
+else (否)
+  :告警检测完成;
+endif
+
+stop
+
+@enduml
+
+
+
+

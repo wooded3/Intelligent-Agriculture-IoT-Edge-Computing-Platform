@@ -1,0 +1,36 @@
+@startuml 设备注册用例鲁棒图
+
+skinparam linetype ortho
+skinparam roundcorner 5
+skinparam shadowing false
+
+left to right direction
+
+actor "学校管理员" as Admin
+
+boundary "设备注册界面" as Boundary
+control "设备注册" as Controller
+entity "设备信息" as DeviceEntity
+entity "设备表" as DeviceTable
+
+Admin --> Boundary : 填写设备信息\n点击注册
+Boundary --> Controller : 提交设备信息
+Controller --> DeviceEntity : 创建设备对象
+Controller --> DeviceTable : 保存设备信息
+DeviceTable --> Controller : 返回保存结果
+Controller --> Boundary : 返回注册结果
+Boundary --> Admin : 显示注册成功
+
+note right of Controller
+  业务逻辑：
+  1. 验证设备信息
+  2. 生成设备ID
+  3. 设置默认状态
+  4. 保存到数据库
+end note
+
+@enduml
+
+
+
+

@@ -1,0 +1,52 @@
+@startuml 数据采集用例鲁棒图
+
+skinparam linetype ortho
+skinparam roundcorner 5
+skinparam shadowing false
+
+left to right direction
+
+actor "IoT设备" as Device
+
+boundary "数据上报接口" as Boundary
+control "数据采集" as DataControl
+control "告警检测" as AlertControl
+entity "传感器数据" as MetricEntity
+entity "传感器数据表" as MetricTable
+entity "告警规则表" as AlertRuleTable
+entity "活跃告警表" as ActiveAlertTable
+
+Device --> Boundary : POST /api/data/metrics\n(设备ID、数值、单位、时间戳)
+Boundary --> DataControl : 接收数据上报
+DataControl --> MetricEntity : 创建数据记录
+DataControl --> MetricTable : 保存数据
+MetricTable --> DataControl : 返回保存结果
+DataControl --> AlertControl : 触发告警检测
+AlertControl --> AlertRuleTable : 查询告警规则
+AlertRuleTable --> AlertControl : 返回规则列表
+AlertControl --> ActiveAlertTable : 保存活跃告警
+ActiveAlertTable --> AlertControl : 返回保存结果
+AlertControl --> DataControl : 告警检测完成
+DataControl --> Boundary : 返回成功响应
+Boundary --> Device : HTTP 200 OK
+
+note right of DataControl
+  数据采集逻辑：
+  1. 验证数据格式
+  2. 生成数据ID
+  3. 保存到数据库
+  4. 触发告警检测
+end note
+
+note right of AlertControl
+  告警检测逻辑：
+  1. 查询启用的告警规则
+  2. 检查数据是否满足条件
+  3. 生成活跃告警
+end note
+
+@enduml
+
+
+
+

@@ -1,77 +1,56 @@
 # 智慧教室物联网系统接口文档
 
-## 1. 设备管理
+## 环境配置
 
-### 1.1 设备列表查询
-
-#### 1.1.1 基本信息
-
-- **请求路径**：`/devices`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于设备列表数据查询  
-
-#### 1.1.2 请求参数
-
-- **参数格式**：`queryString`  
-
-| 参数名称      | 是否必须 | 示例             | 备注                         |
-| ------------- | -------- | ---------------- | ---------------------------- |
-| `page`        | 否       | `1`              | 页码，默认为 1               |
-| `pageSize`    | 否       | `10`             | 每页数量，默认为 10          |
-| `classroomId` | 否       | `classroom_101`  | 教室 ID                      |
-| `type`        | 否       | `SENSOR`         | 设备类型                     |
-
-**请求数据样例：**
-
-```shell
-/devices?page=1&pageSize=10&classroomId=classroom_101&type=SENSOR
+### 基础URL
+```
+http://localhost:8080/api
 ```
 
-#### 1.1.3 响应数据
+### 请求头
+```
+Content-Type: application/json
+```
 
-- **参数格式**：`application/json`
+---
 
-| 参数名          | 类型     | 是否必须 | 备注                                        |
-| --------------- | -------- | -------- | ------------------------------------------- |
-| `code`          | number   | 必须     | 响应码，`1` 代表成功，`0` 代表失败          |
-| `msg`           | string   | 非必须   | 提示信息                                    |
-| `data`          | object   | 非必须   | 返回的数据                                  |
-| `data.total`    | number   | 必须     | 总记录数                                    |
-| `data.rows`     | object[] | 必须     | 设备列表                                    |
-| `rows[].id`     | string   | 必须     | 设备 ID                                     |
-| `rows[].name`   | string   | 必须     | 设备名称                                    |
-| `rows[].type`   | string   | 必须     | 设备类型 (`SENSOR`, `ACTUATOR`, `GATEWAY`) |
-| `rows[].status` | string   | 必须     | 设备状态 (`ONLINE`, `OFFLINE`, `ERROR`)    |
-| `rows[].classroomId` | string | 必须  | 教室 ID                                     |
-| `rows[].createTime`  | string | 必须  | 创建时间                                    |
-| `rows[].updateTime`  | string | 必须  | 更新时间                                    |
+## 1. 设备管理模块
 
-**响应数据样例：**
+### 1.1 查询设备列表
 
+**接口信息：**
+- **方法**：GET
+- **路径**：`/devices`
+- **完整URL**：`http://localhost:8080/api/devices`
+
+**请求参数（Query）：**
+```
+page: 1
+pageSize: 10
+classroomId: (可选) classroom_101
+type: (可选) SENSOR
+```
+
+**测试用例：**
+```
+GET http://localhost:8080/api/devices?page=1&pageSize=10
+```
+
+**期望响应：**
 ```json
 {
   "code": 1,
   "msg": "success",
   "data": {
-    "total": 5,
+    "total": 10,
     "rows": [
       {
-        "id": "device_001",
-        "name": "温度传感器-101教室",
+        "id": "device_xxx",
+        "name": "温度传感器-101",
         "type": "SENSOR",
         "status": "ONLINE",
         "classroomId": "classroom_101",
-        "createTime": "2024-01-01T10:00:00",
-        "updateTime": "2024-01-01T10:00:00"
-      },
-      {
-        "id": "device_002",
-        "name": "湿度传感器-101教室",
-        "type": "SENSOR",
-        "status": "ONLINE",
-        "classroomId": "classroom_101",
-        "createTime": "2024-01-01T10:00:00",
-        "updateTime": "2024-01-01T10:00:00"
+        "createTime": "2024-01-01T10:00:00"
       }
     ]
   }
@@ -80,273 +59,285 @@
 
 ---
 
-### 1.2 设备注册
+### 1.2 获取设备统计信息
 
-#### 1.2.1 基本信息
+**接口信息：**
+- **方法**：GET
+- **路径**：`/devices/stats`
+- **完整URL**：`http://localhost:8080/api/devices/stats`
 
-- **请求路径**：`/devices`  
-- **请求方式**：`POST`  
-- **接口描述**：该接口用于注册新设备  
-
-#### 1.2.2 请求参数
-
-- **参数格式**：`application/json`
-
-| 参数名        | 类型   | 是否必须 | 备注       |
-| ------------- | ------ | -------- | ---------- |
-| `name`        | string | 必须     | 设备名称   |
-| `type`        | string | 必须     | 设备类型   |
-| `classroomId` | string | 必须     | 教室 ID    |
-| `config`      | object | 非必须   | 设备配置   |
-
-**请求参数样例：**
-
-```json
-{
-  "name": "温度传感器-102教室",
-  "type": "SENSOR",
-  "classroomId": "classroom_102",
-  "config": {
-    "samplingInterval": 30,
-    "threshold": 28.5
-  }
-}
+**测试用例：**
+```
+GET http://localhost:8080/api/devices/stats
 ```
 
-#### 1.2.3 响应数据
-
-- **参数格式**：`application/json`
-
-| 参数名 | 类型   | 是否必须 | 备注                               |
-| ------ | ------ | -------- | ---------------------------------- |
-| `code` | number | 必须     | 响应码，`1` 代表成功，`0` 代表失败 |
-| `msg`  | string | 非必须   | 提示信息                           |
-| `data` | object | 非必须   | 返回的数据                         |
-
-**响应数据样例：**
-
-```json
-{
-  "code": 1,
-  "msg": "设备注册成功",
-  "data": null
-}
-```
-
----
-
-### 1.3 设备详情查询
-
-#### 1.3.1 基本信息
-
-- **请求路径**：`/devices/{id}`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于根据 ID 查询设备详情  
-
-#### 1.3.2 请求参数
-
-- **参数格式**：路径参数
-
-| 参数名 | 类型   | 是否必须 | 备注    |
-| ------ | ------ | -------- | ------- |
-| `id`   | string | 必须     | 设备 ID |
-
-**请求参数样例：**
-
-```text
-/devices/device_001
-```
-
-#### 1.3.3 响应数据
-
-- **参数格式**：`application/json`
-
-| 参数名            | 类型   | 是否必须 | 备注     |
-| ----------------- | ------ | -------- | -------- |
-| `code`            | number | 必须     | 响应码   |
-| `msg`             | string | 非必须   | 提示信息 |
-| `data`            | object | 非必须   | 设备详情 |
-| `data.id`         | string | 必须     | 设备 ID  |
-| `data.name`       | string | 必须     | 设备名称 |
-| `data.type`       | string | 必须     | 设备类型 |
-| `data.status`     | string | 必须     | 设备状态 |
-| `data.classroomId`| string | 必须     | 教室 ID  |
-| `data.config`     | object | 非必须   | 设备配置 |
-| `data.createTime` | string | 必须     | 创建时间 |
-| `data.updateTime` | string | 必须     | 更新时间 |
-
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
   "msg": "success",
   "data": {
-    "id": "device_001",
-    "name": "温度传感器-101教室",
+    "total": 20,
+    "online": 15,
+    "offline": 3,
+    "error": 2
+  }
+}
+```
+
+---
+
+### 1.3 根据ID查询设备
+
+**接口信息：**
+- **方法**：GET
+- **路径**：`/devices/{id}`
+- **完整URL**：`http://localhost:8080/api/devices/device_12345678`
+
+**测试用例：**
+```
+GET http://localhost:8080/api/devices/device_12345678
+```
+
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": {
+    "id": "device_12345678",
+    "name": "温度传感器-101",
     "type": "SENSOR",
     "status": "ONLINE",
     "classroomId": "classroom_101",
-    "config": {
-      "samplingInterval": 30,
-      "threshold": 28.5
-    },
-    "createTime": "2024-01-01T10:00:00",
-    "updateTime": "2024-01-01T10:00:00"
+    "createTime": "2024-01-01T10:00:00"
   }
 }
 ```
 
 ---
 
-### 1.4 更新设备信息
+### 1.4 注册设备
 
-#### 1.4.1 基本信息
+**接口信息：**
+- **方法**：POST
+- **路径**：`/devices`
+- **完整URL**：`http://localhost:8080/api/devices`
 
-- **请求路径**：`/devices`  
-- **请求方式**：`PUT`  
-- **接口描述**：该接口用于更新设备信息  
-
-#### 1.4.2 请求参数
-
-- **参数格式**：`application/json`
-
-| 参数名        | 类型   | 是否必须 | 备注     |
-| ------------- | ------ | -------- | -------- |
-| `id`          | string | 必须     | 设备 ID  |
-| `name`        | string | 必须     | 设备名称 |
-| `type`        | string | 必须     | 设备类型 |
-| `classroomId` | string | 必须     | 教室 ID  |
-| `config`      | object | 非必须   | 设备配置 |
-
-**请求参数样例：**
-
+**请求体（Body - JSON）：**
 ```json
 {
-  "id": "device_001",
-  "name": "温度传感器-101教室(更新)",
+  "name": "温度传感器-102",
   "type": "SENSOR",
-  "classroomId": "classroom_101",
+  "classroomId": "classroom_102",
   "config": {
-    "samplingInterval": 60,
-    "threshold": 30.0
+    "samplingRate": 60,
+    "unit": "°C"
   }
 }
 ```
 
-#### 1.4.3 响应数据
+**测试用例：**
+```
+POST http://localhost:8080/api/devices
+Content-Type: application/json
 
-- **参数格式**：`application/json`
+{
+  "name": "温度传感器-102",
+  "type": "SENSOR",
+  "classroomId": "classroom_102",
+  "config": {
+    "samplingRate": 60,
+    "unit": "°C"
+  }
+}
+```
 
-| 参数名 | 类型   | 是否必须 | 备注                               |
-| ------ | ------ | -------- | ---------------------------------- |
-| `code` | number | 必须     | 响应码，`1` 代表成功，`0` 代表失败 |
-| `msg`  | string | 非必须   | 提示信息                           |
-| `data` | object | 非必须   | 返回的数据                         |
-
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
-  "msg": "设备更新成功",
+  "msg": "success",
+  "data": {
+    "id": "device_xxxxxxxx",
+    "name": "温度传感器-102",
+    "type": "SENSOR",
+    "status": "OFFLINE",
+    "classroomId": "classroom_102",
+    "createTime": "2024-01-01T10:00:00"
+  }
+}
+```
+
+---
+
+### 1.5 更新设备
+
+**接口信息：**
+- **方法**：PUT
+- **路径**：`/devices/{id}`
+- **完整URL**：`http://localhost:8080/api/devices/device_12345678`
+
+**请求体（Body - JSON）：**
+```json
+{
+  "name": "温度传感器-102-更新",
+  "type": "SENSOR",
+  "classroomId": "classroom_102",
+  "config": {
+    "samplingRate": 120
+  }
+}
+```
+
+**测试用例：**
+```
+PUT http://localhost:8080/api/devices/device_12345678
+Content-Type: application/json
+
+{
+  "name": "温度传感器-102-更新",
+  "type": "SENSOR",
+  "classroomId": "classroom_102",
+  "config": {
+    "samplingRate": 120
+  }
+}
+```
+
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": {
+    "id": "device_12345678",
+    "name": "温度传感器-102-更新",
+    "type": "SENSOR",
+    "status": "ONLINE",
+    "classroomId": "classroom_102"
+  }
+}
+```
+
+---
+
+### 1.6 删除设备
+
+**接口信息：**
+- **方法**：DELETE
+- **路径**：`/devices/{id}`
+- **完整URL**：`http://localhost:8080/api/devices/device_12345678`
+
+**测试用例：**
+```
+DELETE http://localhost:8080/api/devices/device_12345678
+```
+
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
   "data": null
 }
 ```
 
 ---
 
-### 1.5 删除设备
+### 1.7 更新设备状态
 
-#### 1.5.1 基本信息
+**接口信息：**
+- **方法**：PATCH
+- **路径**：`/devices/{id}/status`
+- **完整URL**：`http://localhost:8080/api/devices/device_12345678/status?status=ONLINE`
 
-- **请求路径**：`/devices/{id}`  
-- **请求方式**：`DELETE`  
-- **接口描述**：该接口用于删除设备  
-
-#### 1.5.2 请求参数
-
-- **参数格式**：路径参数
-
-| 参数名 | 类型   | 是否必须 | 备注    |
-| ------ | ------ | -------- | ------- |
-| `id`   | string | 必须     | 设备 ID |
-
-**请求参数样例：**
-
-```text
-/devices/device_001
+**请求参数（Query）：**
+```
+status: ONLINE
 ```
 
-#### 1.5.3 响应数据
+**测试用例：**
+```
+PATCH http://localhost:8080/api/devices/device_12345678/status?status=ONLINE
+```
 
-- **参数格式**：`application/json`
-
-| 参数名 | 类型   | 是否必须 | 备注                               |
-| ------ | ------ | -------- | ---------------------------------- |
-| `code` | number | 必须     | 响应码，`1` 代表成功，`0` 代表失败 |
-| `msg`  | string | 非必须   | 提示信息                           |
-| `data` | object | 非必须   | 返回的数据                         |
-
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
-  "msg": "设备删除成功",
+  "msg": "success",
   "data": null
 }
 ```
 
 ---
 
-## 2. 数据查询
+## 2. 数据管理模块
 
-### 2.1 传感器数据查询
+### 2.1 上报传感器数据
 
-#### 2.1.1 基本信息
+**接口信息：**
+- **方法**：POST
+- **路径**：`/sensor-data`
+- **完整URL**：`http://localhost:8080/api/sensor-data`
 
-- **请求路径**：`/sensor-data`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于查询传感器数据  
-
-#### 2.1.2 请求参数
-
-- **参数格式**：`queryString`
-
-| 参数名称    | 是否必须 | 示例                  | 备注         |
-| ----------- | -------- | --------------------- | ------------ |
-| `deviceId`  | 否       | `device_001`          | 设备 ID      |
-| `startTime` | 否       | `2024-01-01T00:00:00` | 开始时间     |
-| `endTime`   | 否       | `2024-01-02T00:00:00` | 结束时间     |
-| `page`      | 否       | `1`                   | 页码，默认 1 |
-| `pageSize`  | 否       | `10`                  | 每页数量，默认 10 |
-
-**请求数据样例：**
-
-```shell
-/sensor-data?deviceId=device_001&startTime=2024-01-01T00:00:00&endTime=2024-01-02T00:00:00&page=1&pageSize=10
+**请求体（Body - JSON）：**
+```json
+{
+  "deviceId": "device_12345678",
+  "value": 25.6,
+  "unit": "°C",
+  "timestamp": "2024-01-01T10:00:00Z"
+}
 ```
 
-#### 2.1.3 响应数据
+**测试用例：**
+```
+POST http://localhost:8080/api/sensor-data
+Content-Type: application/json
 
-- **参数格式**：`application/json`
+{
+  "deviceId": "device_12345678",
+  "value": 25.6,
+  "unit": "°C",
+  "timestamp": "2024-01-01T10:00:00Z"
+}
+```
 
-| 参数名              | 类型     | 是否必须 | 备注       |
-| ------------------- | -------- | -------- | ---------- |
-| `code`              | number   | 必须     | 响应码     |
-| `msg`               | string   | 非必须   | 提示信息   |
-| `data`              | object   | 非必须   | 返回的数据 |
-| `data.total`        | number   | 必须     | 总记录数   |
-| `data.rows`         | object[] | 必须     | 数据列表   |
-| `rows[].id`         | string   | 必须     | 数据 ID    |
-| `rows[].deviceId`   | string   | 必须     | 设备 ID    |
-| `rows[].value`      | number   | 必须     | 传感器数值 |
-| `rows[].unit`       | string   | 必须     | 数值单位   |
-| `rows[].timestamp`  | string   | 必须     | 采集时间   |
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": null
+}
+```
 
-**响应数据样例：**
+---
 
+### 2.2 查询传感器数据
+
+**接口信息：**
+- **方法**：GET
+- **路径**：`/sensor-data`
+- **完整URL**：`http://localhost:8080/api/sensor-data`
+
+**请求参数（Query）：**
+```
+deviceId: (可选) device_12345678
+startTime: (可选) 2024-01-01T00:00:00Z
+endTime: (可选) 2024-01-01T23:59:59Z
+page: 1
+pageSize: 10
+```
+
+**测试用例：**
+```
+GET http://localhost:8080/api/sensor-data?deviceId=device_12345678&page=1&pageSize=10
+```
+
+**期望响应：**
 ```json
 {
   "code": 1,
@@ -355,18 +346,11 @@
     "total": 100,
     "rows": [
       {
-        "id": "data_001",
-        "deviceId": "device_001",
+        "id": "metric_xxxxxxxx",
+        "deviceId": "device_12345678",
         "value": 25.6,
         "unit": "°C",
-        "timestamp": "2024-01-01T10:00:00"
-      },
-      {
-        "id": "data_002",
-        "deviceId": "device_001",
-        "value": 25.8,
-        "unit": "°C",
-        "timestamp": "2024-01-01T10:01:00"
+        "timestamp": "2024-01-01T10:00:00Z"
       }
     ]
   }
@@ -375,61 +359,34 @@
 
 ---
 
-## 3. 告警管理
+## 3. 告警管理模块
 
-### 3.1 告警规则列表查询
+### 3.1 查询告警规则列表
 
-#### 3.1.1 基本信息
+**接口信息：**
+- **方法**：GET
+- **路径**：`/alerts/rules`
+- **完整URL**：`http://localhost:8080/api/alerts/rules`
 
-- **请求路径**：`/alerts/rules`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于查询告警规则列表  
+**测试用例：**
+```
+GET http://localhost:8080/api/alerts/rules
+```
 
-#### 3.1.2 请求参数
-
-- 无
-
-#### 3.1.3 响应数据
-
-- **参数格式**：`application/json`
-
-| 参数名              | 类型     | 是否必须 | 备注                                       |
-| ------------------- | -------- | -------- | ------------------------------------------ |
-| `code`              | number   | 必须     | 响应码，`1` 代表成功，`0` 代表失败         |
-| `msg`               | string   | 非必须   | 提示信息                                   |
-| `data`              | object[] | 非必须   | 告警规则列表                               |
-| `data[].id`         | string   | 必须     | 规则 ID                                    |
-| `data[].name`       | string   | 必须     | 规则名称                                   |
-| `data[].condition`  | string   | 必须     | 条件 (`GREATER_THAN`, `LESS_THAN`, `EQUAL`) |
-| `data[].threshold`  | number   | 必须     | 阈值                                       |
-| `data[].deviceIds`  | string[] | 必须     | 设备 ID 列表                               |
-| `data[].enabled`    | boolean  | 必须     | 是否启用                                   |
-| `data[].createTime` | string   | 必须     | 创建时间                                   |
-
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
   "msg": "success",
   "data": [
     {
-      "id": "rule_001",
+      "id": "rule_1",
       "name": "高温告警",
       "condition": "GREATER_THAN",
       "threshold": 30.0,
-      "deviceIds": ["device_001", "device_002"],
+      "deviceIds": ["device_12345678"],
       "enabled": true,
-      "createTime": "2024-01-01T10:00:00"
-    },
-    {
-      "id": "rule_002",
-      "name": "低温告警",
-      "condition": "LESS_THAN",
-      "threshold": 18.0,
-      "deviceIds": ["device_001"],
-      "enabled": true,
-      "createTime": "2024-01-01T10:00:00"
+      "createTime": "2024-01-01T10:00:00Z"
     }
   ]
 }
@@ -439,100 +396,80 @@
 
 ### 3.2 创建告警规则
 
-#### 3.2.1 基本信息
+**接口信息：**
+- **方法**：POST
+- **路径**：`/alerts/rules`
+- **完整URL**：`http://localhost:8080/api/alerts/rules`
 
-- **请求路径**：`/alerts/rules`  
-- **请求方式**：`POST`  
-- **接口描述**：该接口用于创建告警规则  
-
-#### 3.2.2 请求参数
-
-- **参数格式**：`application/json`
-
-| 参数名      | 类型     | 是否必须 | 备注         |
-| ----------- | -------- | -------- | ------------ |
-| `name`      | string   | 必须     | 规则名称     |
-| `condition` | string   | 必须     | 条件         |
-| `threshold` | number   | 必须     | 阈值         |
-| `deviceIds` | string[] | 必须     | 设备 ID 列表 |
-| `enabled`   | boolean  | 必须     | 是否启用     |
-
-**请求参数样例：**
-
+**请求体（Body - JSON）：**
 ```json
 {
-  "name": "湿度过高告警",
+  "name": "高温告警",
   "condition": "GREATER_THAN",
-  "threshold": 80.0,
-  "deviceIds": ["device_003", "device_004"],
+  "threshold": 30.0,
+  "deviceIds": ["device_12345678", "device_87654321"],
   "enabled": true
 }
 ```
 
-#### 3.2.3 响应数据
+**测试用例：**
+```
+POST http://localhost:8080/api/alerts/rules
+Content-Type: application/json
 
-- **参数格式**：`application/json`
+{
+  "name": "高温告警",
+  "condition": "GREATER_THAN",
+  "threshold": 30.0,
+  "deviceIds": ["device_12345678"],
+  "enabled": true
+}
+```
 
-| 参数名 | 类型   | 是否必须 | 备注                               |
-| ------ | ------ | -------- | ---------------------------------- |
-| `code` | number | 必须     | 响应码，`1` 代表成功，`0` 代表失败 |
-| `msg`  | string | 非必须   | 提示信息                           |
-| `data` | object | 非必须   | 返回的数据                         |
-
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
   "msg": "告警规则创建成功",
-  "data": null
+  "data": {
+    "id": "rule_xxxxxxxx",
+    "name": "高温告警",
+    "condition": "GREATER_THAN",
+    "threshold": 30.0,
+    "deviceIds": ["device_12345678"],
+    "enabled": true,
+    "createTime": "2024-01-01T10:00:00Z"
+  }
 }
 ```
 
 ---
 
-### 3.3 当前活跃告警查询
+### 3.3 查询当前活跃告警
 
-#### 3.3.1 基本信息
+**接口信息：**
+- **方法**：GET
+- **路径**：`/alerts/current`
+- **完整URL**：`http://localhost:8080/api/alerts/current`
 
-- **请求路径**：`/alerts/current`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于查询当前活跃告警  
+**测试用例：**
+```
+GET http://localhost:8080/api/alerts/current
+```
 
-#### 3.3.2 请求参数
-
-- 无
-
-#### 3.3.3 响应数据
-
-- **参数格式**：`application/json`
-
-| 参数名              | 类型     | 是否必须 | 备注         |
-| ------------------- | -------- | -------- | ------------ |
-| `code`              | number   | 必须     | 响应码       |
-| `msg`               | string   | 非必须   | 提示信息     |
-| `data`              | object[] | 非必须   | 活跃告警列表 |
-| `data[].id`         | string   | 必须     | 告警 ID      |
-| `data[].ruleName`   | string   | 必须     | 规则名称     |
-| `data[].deviceName` | string   | 必须     | 设备名称     |
-| `data[].value`      | number   | 必须     | 触发值       |
-| `data[].threshold`  | number   | 必须     | 阈值         |
-| `data[].timestamp`  | string   | 必须     | 触发时间     |
-
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
   "msg": "success",
   "data": [
     {
-      "id": "alert_001",
+      "id": "alert_xxxxxxxx",
       "ruleName": "高温告警",
-      "deviceName": "温度传感器-101教室",
+      "deviceName": "温度传感器-101",
       "value": 31.5,
       "threshold": 30.0,
-      "timestamp": "2024-01-01T14:30:00"
+      "timestamp": "2024-01-01T10:00:00Z"
     }
   ]
 }
@@ -540,38 +477,44 @@
 
 ---
 
-## 4. 自动化控制
+### 3.4 处理告警（标记为已解决）
 
-### 4.1 自动化规则列表查询
+**接口信息：**
+- **方法**：PATCH
+- **路径**：`/alerts/{alertId}/resolve`
+- **完整URL**：`http://localhost:8080/api/alerts/alert_12345678/resolve`
 
-#### 4.1.1 基本信息
+**测试用例：**
+```
+PATCH http://localhost:8080/api/alerts/alert_12345678/resolve
+```
 
-- **请求路径**：`/automation/rules`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于查询自动化规则列表  
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": null
+}
+```
 
-#### 4.1.2 请求参数
+---
 
-- 无
+## 4. 自动化控制模块
 
-#### 4.1.3 响应数据
+### 4.1 查询自动化规则列表
 
-- **参数格式**：`application/json`
+**接口信息：**
+- **方法**：GET
+- **路径**：`/automation/rules`
+- **完整URL**：`http://localhost:8080/api/automation/rules`
 
-| 参数名              | 类型     | 是否必须 | 备注                               |
-| ------------------- | -------- | -------- | ---------------------------------- |
-| `code`              | number   | 必须     | 响应码，`1` 代表成功，`0` 代表失败 |
-| `msg`               | string   | 非必须   | 提示信息                           |
-| `data`              | object[] | 非必须   | 自动化规则列表                     |
-| `data[].id`         | string   | -        | 规则 ID                            |
-| `data[].name`       | string   | -        | 规则名称                           |
-| `data[].condition`  | string   | -        | 条件                               |
-| `data[].action`     | string   | -        | 动作                               |
-| `data[].enabled`    | boolean  | -        | 是否启用                           |
-| `data[].createTime` | string   | -        | 创建时间                           |
+**测试用例：**
+```
+GET http://localhost:8080/api/automation/rules
+```
 
-**响应数据样例：**
-
+**期望响应：**
 ```json
 {
   "code": 1,
@@ -583,7 +526,7 @@
       "condition": "光照度 < 300",
       "action": "打开灯光",
       "enabled": true,
-      "createTime": "2024-01-01T10:00:00"
+      "createTime": "2024-01-01T10:00:00Z"
     }
   ]
 }
@@ -591,36 +534,135 @@
 
 ---
 
-## 5. 系统管理
+### 4.2 创建自动化规则
 
-### 5.1 教室列表查询
+**接口信息：**
+- **方法**：POST
+- **路径**：`/automation/rules`
+- **完整URL**：`http://localhost:8080/api/automation/rules`
 
-#### 5.1.1 基本信息
+**请求体（Body - JSON）：**
+```json
+{
+  "name": "自动调温",
+  "condition": "温度 > 30",
+  "action": "打开空调",
+  "enabled": true
+}
+```
 
-- **请求路径**：`/classrooms`  
-- **请求方式**：`GET`  
-- **接口描述**：该接口用于查询教室列表  
+**测试用例：**
+```
+POST http://localhost:8080/api/automation/rules
+Content-Type: application/json
 
-#### 5.1.2 请求参数
+{
+  "name": "自动调温",
+  "condition": "温度 > 30",
+  "action": "打开空调",
+  "enabled": true
+}
+```
 
-- 无
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": {
+    "id": "auto_xxxxxxxx",
+    "name": "自动调温",
+    "condition": "温度 > 30",
+    "action": "打开空调",
+    "enabled": true,
+    "createTime": "2024-01-01T10:00:00Z"
+  }
+}
+```
 
-#### 5.1.3 响应数据
+---
 
-- **参数格式**：`application/json`
+### 4.3 启用/禁用自动化规则
 
-| 参数名                | 类型     | 是否必须 | 备注                               |
-| --------------------- | -------- | -------- | ---------------------------------- |
-| `code`                | number   | 必须     | 响应码，`1` 代表成功，`0` 代表失败 |
-| `msg`                 | string   | 非必须   | 提示信息                           |
-| `data`                | object[] | 非必须   | 教室列表                           |
-| `data[].id`           | string   | 必须     | 教室 ID                            |
-| `data[].name`         | string   | 必须     | 教室名称                           |
-| `data[].location`     | string   | 必须     | 教室位置                           |
-| `data[].deviceCount`  | number   | 必须     | 设备数量                           |
+**接口信息：**
+- **方法**：PATCH
+- **路径**：`/automation/rules/{id}/toggle`
+- **完整URL**：`http://localhost:8080/api/automation/rules/auto_001/toggle`
 
-**响应数据样例：**
+**测试用例：**
+```
+PATCH http://localhost:8080/api/automation/rules/auto_001/toggle
+```
 
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": null
+}
+```
+
+---
+
+### 4.4 删除自动化规则
+
+**接口信息：**
+- **方法**：DELETE
+- **路径**：`/automation/rules/{id}`
+- **完整URL**：`http://localhost:8080/api/automation/rules/auto_001`
+
+**测试用例：**
+```
+DELETE http://localhost:8080/api/automation/rules/auto_001
+```
+
+**期望响应：**
+```json
+{
+  "code": 1,
+  "msg": "success",
+  "data": null
+}
+```
+
+---
+
+## 5. 系统维护模块
+
+### 5.1 查询系统状态
+
+**接口信息：**
+- **方法**：GET
+- **路径**：`/maintenance/status`
+- **完整URL**：`http://localhost:8080/api/maintenance/status`
+
+**测试用例：**
+```
+GET http://localhost:8080/api/maintenance/status
+```
+
+**期望响应：**
+```
+OK
+```
+（注意：这个接口返回的是纯文本，不是JSON）
+
+---
+
+### 5.2 查询教室列表
+
+**接口信息：**
+- **方法**：GET
+- **路径**：`/classrooms`
+- **完整URL**：`http://localhost:8080/api/classrooms`
+
+**测试用例：**
+```
+GET http://localhost:8080/api/classrooms
+```
+
+**期望响应：**
 ```json
 {
   "code": 1,
@@ -641,3 +683,88 @@
   ]
 }
 ```
+
+---
+
+## 6. Apifox 测试说明
+
+### 6.1 环境配置
+
+在Apifox中创建环境，设置变量：
+- `baseUrl = http://localhost:8080/api`
+
+### 6.2 测试流程建议
+
+#### 完整测试流程（按顺序执行）
+
+1. **设备管理模块**
+   - 先注册一个设备（1.4）
+   - 查询设备列表（1.1）
+   - 获取设备统计（1.2）
+   - 查询刚注册的设备详情（1.3）
+   - 更新设备信息（1.5）
+   - 更新设备状态（1.7）
+   - 最后删除设备（1.6）
+
+2. **数据管理模块**
+   - 先确保有设备ID（从步骤1获取）
+   - 上报传感器数据（2.1）
+   - 查询上报的数据（2.2）
+
+3. **告警管理模块**
+   - 创建告警规则（3.2）
+   - 查询告警规则列表（3.1）
+   - 查询活跃告警（3.3）
+   - 处理告警（3.4）
+
+4. **自动化控制模块**
+   - 查询自动化规则列表（4.1）
+   - 创建自动化规则（4.2）
+   - 启用/禁用规则（4.3）
+   - 删除规则（4.4）
+
+5. **系统维护模块**
+   - 查询系统状态（5.1）
+   - 查询教室列表（5.2）
+
+### 6.3 Apifox 使用提示
+
+1. **创建环境变量**
+   - 在Apifox中创建环境，设置变量 `baseUrl = http://localhost:8080/api`
+   - 在接口路径中使用 `{{baseUrl}}/devices` 的形式
+
+2. **保存响应数据**
+   - 在测试用例中，可以将返回的设备ID、规则ID等保存为环境变量
+   - 后续测试用例可以直接使用这些变量
+
+3. **批量测试**
+   - 可以使用Apifox的测试套件功能，批量执行所有测试用例
+   - 设置断言验证响应状态码和数据格式
+
+4. **导出测试报告**
+   - 测试完成后可以导出测试报告，记录测试结果
+
+### 6.4 常见错误处理
+
+#### 错误响应格式
+```json
+{
+  "code": 0,
+  "msg": "错误信息描述",
+  "data": null
+}
+```
+
+#### 常见错误场景
+
+1. **设备不存在**
+   - 使用不存在的设备ID查询或更新
+   - 期望：返回错误信息"设备不存在"
+
+2. **参数验证失败**
+   - 缺少必填字段（如name、type）
+   - 期望：返回错误信息"设备名称不能为空"等
+
+3. **规则不存在**
+   - 使用不存在的规则ID操作
+   - 期望：返回错误信息"规则不存在"

@@ -1,0 +1,55 @@
+@startuml 系统物理架构部署图
+
+node "客户端节点" {
+  artifact "Web浏览器" as Browser
+  artifact "IoT设备" as IoTDevice
+}
+
+node "应用服务器节点" {
+  artifact "前端服务器\n(Vite Dev Server)" as FrontendServer {
+    component "Vue 3应用" as VueApp
+  }
+  
+  artifact "后端服务器\n(Spring Boot)" as BackendServer {
+    component "Tomcat容器" as Tomcat
+    component "Spring Boot应用" as SpringApp
+  }
+}
+
+node "数据库服务器节点" {
+  database "MySQL数据库服务器" as MySQLServer {
+    database "smart_classroom数据库" as Database
+  }
+}
+
+' 连接关系
+Browser --> FrontendServer : HTTP/HTTPS\n(端口5173)
+IoTDevice --> BackendServer : HTTP/HTTPS\n(端口8080)
+FrontendServer --> BackendServer : HTTP/HTTPS\n(端口8080/api)
+BackendServer --> MySQLServer : JDBC\n(端口3306)
+
+note right of Browser
+  用户通过浏览器访问
+  前端Web应用
+end note
+
+note right of IoTDevice
+  IoT设备通过HTTP协议
+  上报传感器数据
+end note
+
+note right of BackendServer
+  Spring Boot应用运行在
+  Tomcat容器中
+end note
+
+note right of MySQLServer
+  MySQL数据库存储
+  所有业务数据
+end note
+
+@enduml
+
+
+
+

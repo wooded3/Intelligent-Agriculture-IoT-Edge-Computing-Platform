@@ -1,0 +1,62 @@
+@startuml 数据保存业务逻辑活动图
+
+start
+
+:接收设备上报的数据;
+
+:提取请求参数\n(deviceId, value, unit, timestamp);
+
+if (设备ID是否为空?) then (是)
+  :返回400错误：设备ID不能为空;
+  stop
+else (否)
+endif
+
+if (设备ID是否存在?) then (否)
+  :返回404错误：设备不存在;
+  stop
+else (是)
+endif
+
+if (数值是否有效?) then (否)
+  :返回400错误：数值无效;
+  stop
+else (是)
+endif
+
+if (时间戳是否有效?) then (否)
+  :使用当前时间作为时间戳;
+else (是)
+endif
+
+:生成数据记录ID\n(metric_随机字符串);
+
+:创建MetricRecord对象;
+
+:设置数据记录信息\n(设备ID、数值、单位、时间戳);
+
+:调用MetricMapper.insert()\n保存数据到数据库;
+
+if (保存成功?) then (是)
+  :触发告警检测\n(调用AlertService.checkAndGenerateAlert);
+  
+  note right
+    告警检测流程：
+    1. 查询启用的告警规则
+    2. 检查数据是否满足条件
+    3. 生成活跃告警（如需要）
+  end note
+  
+  :返回200成功响应;
+else (否)
+  :返回500错误：保存失败;
+  stop
+endif
+
+stop
+
+@enduml
+
+
+
+

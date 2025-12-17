@@ -4,21 +4,40 @@ left to right direction
 
 actor "教师" as Teacher
 actor "学生" as Student
+actor "学校管理员" as Admin
 actor "系统" as System
 
 usecase "数据采集" as UC1
-usecase "数据查询与可视化" as UC2
-usecase "历史数据导出" as UC3
+usecase "数据查询" as UC2
+usecase "数据可视化" as UC3
 usecase "实时数据展示" as UC4
+usecase "历史数据导出" as UC5
 
 System --> UC1
 Teacher --> UC2
 Student --> UC2
+Admin --> UC2
 Teacher --> UC3
+Student --> UC3
+Admin --> UC3
 Teacher --> UC4
 Student --> UC4
+Admin --> UC4
+Teacher --> UC5
+Admin --> UC5
 
+UC2 .> UC3 : <<include>>
 UC2 .> UC4 : <<include>>
-UC3 .> UC2 : <<extend>>
+UC5 .> UC2 : <<extend>>
+
+note right of UC1
+  系统自动接收设备上报的
+  传感器数据并存储
+end note
+
+note right of UC3
+  使用图表展示数据趋势
+  支持折线图、柱状图等
+end note
 
 @enduml

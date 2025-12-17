@@ -5,17 +5,29 @@ left to right direction
 actor "学校管理员" as Admin
 actor "系统" as System
 
-usecase "自动化规则配置" as UC1
-usecase "自动化控制执行" as UC2
-usecase "规则测试" as UC3
-usecase "控制日志查看" as UC4
+usecase "创建自动化规则" as UC1
+usecase "查询自动化规则列表" as UC2
+usecase "启用/禁用规则" as UC3
+usecase "删除自动化规则" as UC4
+usecase "自动化控制执行" as UC5
+usecase "下发控制指令" as UC6
+usecase "查询控制指令历史" as UC7
 
 Admin --> UC1
-System --> UC2
+Admin --> UC2
 Admin --> UC3
 Admin --> UC4
+Admin --> UC6
+Admin --> UC7
+System --> UC5
 
-UC1 .> UC3 : <<include>>
-UC2 .> UC4 : <<include>>
+UC1 .> UC2 : <<include>>
+UC5 .> UC6 : <<include>>
+UC5 .> UC7 : <<include>>
+
+note right of UC5
+  系统根据规则条件自动
+  检测并执行控制动作
+end note
 
 @enduml

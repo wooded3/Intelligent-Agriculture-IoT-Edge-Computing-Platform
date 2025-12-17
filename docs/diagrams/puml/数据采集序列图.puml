@@ -1,0 +1,65 @@
+@startuml 数据采集序列图
+
+actor "IoT设备" as Device
+participant "DataController" as Controller
+participant "DataService" as Service
+participant "AlertService" as AlertService
+participant "MetricMapper" as Mapper
+database "MySQL数据库" as DB
+
+Device -> Controller : POST /api/data/metrics\n{deviceId, value, unit, timestamp}
+activate Controller
+
+Controller -> Service : saveMetric(deviceId, value, unit, timestamp)
+activate Service
+
+Service -> Service : 验证数据格式\n(设备ID存在、数值有效)
+alt 验证失败
+  Service --> Controller : 抛出异常
+  Controller --> Device : 返回400错误响应
+else 验证成功
+  Service -> Service : 生成数据ID\n(metric_xxxxxxxx)
+  Service -> Mapper : insert(metric)
+  activate Mapper
+  
+  Mapper -> DB : INSERT INTO sensor_data\nVALUES (...)
+  activate DB
+  DB --> Mapper : 返回插入结果
+  deactivate DB
+  
+  Mapper --> Service : 返回MetricRecord对象
+  deactivate Mapper
+  
+  Service -> AlertService : checkAndGenerateAlert(deviceId, deviceName, metricName, value)
+  activate AlertService
+  
+  AlertService -> DB : SELECT * FROM alert_rules\nWHERE enabled = 1
+  activate DB
+  DB --> AlertService : 返回规则列表
+  deactivate DB
+  
+  loop 遍历每个规则
+    AlertService -> AlertService : 检查数据是否满足条件
+    alt 满足告警条件
+      AlertService -> DB : INSERT INTO active_alerts\nVALUES (...)
+      activate DB
+      DB --> AlertService : 返回插入结果
+      deactivate DB
+    end
+  end
+  
+  AlertService --> Service : 告警检测完成
+  deactivate AlertService
+  
+  Service --> Controller : 返回成功响应
+  deactivate Service
+  
+  Controller --> Device : 返回200 OK响应
+  deactivate Controller
+end
+
+@enduml
+
+
+
+

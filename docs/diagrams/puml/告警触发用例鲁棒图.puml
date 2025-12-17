@@ -1,0 +1,51 @@
+@startuml 告警触发用例鲁棒图
+
+skinparam linetype ortho
+skinparam roundcorner 5
+skinparam shadowing false
+
+left to right direction
+
+actor "系统" as System
+
+boundary "数据采集完成事件" as Boundary
+control "告警检测" as AlertControl
+control "计算告警条件" as ConditionControl
+entity "告警规则" as AlertRuleEntity
+entity "告警规则表" as AlertRuleTable
+entity "活跃告警" as ActiveAlertEntity
+entity "活跃告警表" as ActiveAlertTable
+
+System --> Boundary : 数据采集完成
+Boundary --> AlertControl : 触发告警检测
+AlertControl --> AlertRuleTable : 查询启用的告警规则
+AlertRuleTable --> AlertControl : 返回规则列表
+AlertControl --> ConditionControl : 检查数据是否满足条件
+ConditionControl --> AlertRuleEntity : 获取规则条件
+AlertRuleEntity --> ConditionControl : 返回条件信息
+ConditionControl --> AlertControl : 返回判断结果
+AlertControl --> ActiveAlertEntity : 创建告警对象
+AlertControl --> ActiveAlertTable : 保存活跃告警
+ActiveAlertTable --> AlertControl : 返回保存结果
+AlertControl --> Boundary : 告警已生成
+
+note right of AlertControl
+  告警检测逻辑：
+  1. 查询所有启用的告警规则
+  2. 遍历规则，检查数据是否匹配
+  3. 调用计算告警条件
+  4. 如果满足条件，生成活跃告警
+end note
+
+note right of ConditionControl
+  条件判断逻辑：
+  - GREATER_THAN: value > threshold
+  - LESS_THAN: value < threshold
+  - EQUAL: value == threshold
+end note
+
+@enduml
+
+
+
+

@@ -5,17 +5,26 @@ left to right direction
 actor "学校管理员" as Admin
 actor "系统" as System
 
-usecase "告警配置" as UC1
-usecase "告警触发与通知" as UC2
-usecase "告警历史查询" as UC3
-usecase "告警规则编辑" as UC4
+usecase "创建告警规则" as UC1
+usecase "查询告警规则列表" as UC2
+usecase "告警规则编辑" as UC3
+usecase "告警规则删除" as UC4
+usecase "告警触发与检测" as UC5
+usecase "查询活跃告警" as UC6
+usecase "处理告警" as UC7
+usecase "告警历史查询" as UC8
 
 Admin --> UC1
-System --> UC2
+Admin --> UC2
 Admin --> UC3
 Admin --> UC4
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+System --> UC5
 
-UC1 .> UC4 : <<include>>
-UC2 .> UC3 : <<include>>
+UC1 .> UC3 : <<extend>>
+UC5 .> UC6 : <<include>>
+UC7 .> UC8 : <<include>>
 
 @enduml

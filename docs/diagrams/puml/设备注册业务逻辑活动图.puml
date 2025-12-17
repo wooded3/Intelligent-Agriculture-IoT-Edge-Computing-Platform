@@ -1,0 +1,67 @@
+@startuml 设备注册业务逻辑活动图
+
+start
+
+:接收设备注册请求;
+
+:提取请求参数\n(name, type, classroomId, config);
+
+if (设备名称是否为空?) then (是)
+  :抛出异常：设备名称不能为空;
+  stop
+else (否)
+endif
+
+if (设备类型是否为空?) then (是)
+  :抛出异常：设备类型不能为空;
+  stop
+else (否)
+endif
+
+if (教室ID是否为空?) then (是)
+  :抛出异常：教室ID不能为空;
+  stop
+else (否)
+endif
+
+if (设备类型是否有效?) then (否)
+  :抛出异常：无效的设备类型;
+  stop
+else (是)
+  note right
+    有效类型：
+    SENSOR, ACTUATOR, GATEWAY
+  end note
+endif
+
+:生成设备ID\n(device_随机字符串);
+
+:创建Device对象;
+
+:设置设备默认状态为OFFLINE;
+
+:设置创建时间和更新时间;
+
+if (配置参数是否存在?) then (是)
+  :将配置参数转换为JSON字符串;
+else (否)
+  :设置配置为空JSON对象;
+endif
+
+:调用DeviceMapper.insert()\n保存设备到数据库;
+
+if (保存成功?) then (是)
+  :返回Device对象;
+  :显示注册成功提示;
+else (否)
+  :抛出异常：保存失败;
+  stop
+endif
+
+stop
+
+@enduml
+
+
+
+

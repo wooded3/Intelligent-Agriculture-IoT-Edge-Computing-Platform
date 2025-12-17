@@ -1,0 +1,35 @@
+@startuml 设备管理模块用例图
+
+left to right direction
+
+actor "学校管理员" as Admin
+actor "系统" as System
+
+usecase "设备注册" as UC1
+usecase "设备查询" as UC2
+usecase "设备详情查询" as UC2_1
+usecase "设备编辑" as UC3
+usecase "设备删除" as UC4
+usecase "设备状态更新" as UC5
+usecase "设备状态监控" as UC6
+usecase "设备统计" as UC7
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC2_1
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+System --> UC5
+System --> UC6
+
+UC2 .> UC2_1 : <<include>>
+UC2 .> UC7 : <<include>>
+
+@enduml
+
+
+
+
